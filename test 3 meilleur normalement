@@ -1,159 +1,155 @@
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+-- Services nécessaires
+local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
-local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
--- FOND ANIMÉ DÉGRADÉ
-local animatedBg = Instance.new("Frame", CoreGui)
-animatedBg.Name = "AnimatedBackground"
-animatedBg.ZIndex = 0
-animatedBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-animatedBg.BorderSizePixel = 0
-animatedBg.Size = UDim2.new(1, 0, 1, 0)
-animatedBg.Position = UDim2.new(0, 0, 0, 0)
+-- Création de la GUI principale
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "PercyLeMeilleur_Hub"
+gui.IgnoreGuiInset = true
+gui.Enabled = true
 
-local gradient = Instance.new("UIGradient", animatedBg)
-gradient.Rotation = 0
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(0, 255, 200)),
-    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(100, 100, 255)),
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 150))
-}
+-- Création du cadre principal
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 400, 0, 300)
+frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
 
-task.spawn(function()
-    while animatedBg.Parent do
-        for i = 0, 360, 1 do
-            gradient.Rotation = i
-            task.wait(0.02)
-        end
-    end
-end)
+-- Création du bouton pour basculer la visibilité de la GUI
+local toggleButton = Instance.new("TextButton", frame)
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0.5, -50, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+toggleButton.Text = "Masquer"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 20
 
--- ÉCRAN DE CHARGEMENT
-local loadingGui = Instance.new("ScreenGui", CoreGui)
-loadingGui.Name = "PercyLoading"
+-- Création du bouton "TP Joueur"
+local tpButton = Instance.new("TextButton", frame)
+tpButton.Size = UDim2.new(0, 100, 0, 50)
+tpButton.Position = UDim2.new(0.5, -50, 0, 70)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+tpButton.Text = "TP Joueur"
+tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpButton.TextSize = 20
 
-local background = Instance.new("Frame", loadingGui)
-background.Size = UDim2.new(1, 0, 1, 0)
-background.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-background.BackgroundTransparency = 1
+-- Création du bouton "TP Boss"
+local tpBossButton = Instance.new("TextButton", frame)
+tpBossButton.Size = UDim2.new(0, 100, 0, 50)
+tpBossButton.Position = UDim2.new(0.5, -50, 0, 130)
+tpBossButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+tpBossButton.Text = "TP Boss"
+tpBossButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpBossButton.TextSize = 20
 
-local loadingText = Instance.new("TextLabel", background)
-loadingText.AnchorPoint = Vector2.new(0.5, 0.5)
-loadingText.Position = UDim2.new(0.5, 0, 0.5, 0)
-loadingText.Size = UDim2.new(0, 400, 0, 50)
-loadingText.BackgroundTransparency = 1
-loadingText.Font = Enum.Font.GothamBold
-loadingText.Text = "Chargement de Percy le Meilleur..."
-loadingText.TextScaled = true
-loadingText.TextColor3 = Color3.fromRGB(0, 255, 127)
-loadingText.TextTransparency = 1
+-- Variable pour suivre l'état de la GUI
+local guiVisible = true
+local playerListVisible = false
+local bossListVisible = false
 
-TweenService:Create(background, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
-TweenService:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+-- Fonction pour basculer la visibilité de la GUI
+local function toggleGUI()
+    guiVisible = not guiVisible
+    gui.Enabled = guiVisible
+    toggleButton.Text = guiVisible and "Masquer" or "Afficher"
+end
 
-task.delay(2, function()
-    TweenService:Create(background, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    task.wait(0.5)
-    loadingGui:Destroy()
+-- Fonction pour basculer la liste des joueurs
+local function togglePlayerList()
+    playerListVisible = not playerListVisible
 
-    -- GUI PRINCIPALE
-    local gui = Instance.new("ScreenGui", CoreGui)
-    gui.Name = "PercyLeMeilleur_Hub"
+    -- Si la liste est visible, afficher les joueurs
+    if playerListVisible then
+        local playerListFrame = Instance.new("Frame", frame)
+        playerListFrame.Size = UDim2.new(0, 350, 0, 200)
+        playerListFrame.Position = UDim2.new(0, 25, 0, 120)
+        playerListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        playerListFrame.BorderSizePixel = 0
+        playerListFrame.Name = "PlayerListFrame"
 
-    local main = Instance.new("Frame", gui)
-    main.Size = UDim2.new(0, 300, 0, 400)
-    main.Position = UDim2.new(0.02, 0, 0.5, -200)
-    main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    main.ZIndex = 1
-    Instance.new("UICorner", main).CornerRadius = UDim.new(0, 8)
+        -- Ajouter les joueurs à la liste
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                local playerButton = Instance.new("TextButton", playerListFrame)
+                playerButton.Size = UDim2.new(0, 350, 0, 30)
+                playerButton.Position = UDim2.new(0, 0, 0, (otherPlayer.UserId % 10) * 30)
+                playerButton.Text = otherPlayer.Name
+                playerButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    local layout = Instance.new("UIListLayout", main)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 5)
-
-    local autofarm = false
-    local killaura = false
-    local friendsOnly = true
-
-    local function createButton(txt, callback)
-        local btn = Instance.new("TextButton", main)
-        btn.Size = UDim2.new(1, -10, 0, 40)
-        btn.Position = UDim2.new(0, 5, 0, 0)
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        btn.Text = txt
-        btn.Font = Enum.Font.Gotham
-        btn.TextScaled = true
-        btn.TextColor3 = Color3.new(1, 1, 1)
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-        btn.MouseButton1Click:Connect(callback)
-    end
-
-    createButton("Auto Coins [ON/OFF]", function()
-        autofarm = not autofarm
-    end)
-
-    RunService.RenderStepped:Connect(function()
-        if autofarm then
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v.Name == "Coin" and v:IsA("Part") then
-                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = v.CFrame + Vector3.new(0, 3, 0)
-                        task.wait(0.1)
-                    end
-                end
-            end
-        end
-    end)
-
-    createButton("Kill Aura [All/Sauf amis]", function()
-        killaura = not killaura
-    end)
-
-    RunService.RenderStepped:Connect(function()
-        if killaura then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                    local isFriend = Players.LocalPlayer:IsFriendsWith(plr.UserId)
-                    if not friendsOnly or not isFriend then
-                        plr.Character.Humanoid.Health = 0
-                    end
-                end
-            end
-        end
-    end)
-
-    createButton("Lancer Infinite Yield", function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-    end)
-
-    createButton("Sélectionner Boss à TP", function()
-        for _, obj in pairs(Workspace:GetChildren()) do
-            if obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
-                createButton("TP Boss: " .. obj.Name, function()
-                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = obj.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
-                    end
+                playerButton.MouseButton1Click:Connect(function()
+                    -- TP vers le joueur sélectionné
+                    game:GetService("Workspace").CurrentCamera.CFrame = otherPlayer.Character.HumanoidRootPart.CFrame
+                    playerListFrame:Destroy()  -- Cache la liste après la sélection
                 end)
             end
         end
-    end)
-
-    createButton("Sélectionner Joueur à TP", function()
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                createButton("TP: " .. plr.Name, function()
-                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-                    end
-                end)
-            end
+    else
+        -- Si la liste n'est pas visible, cache la liste
+        local playerListFrame = frame:FindFirstChild("PlayerListFrame")
+        if playerListFrame then
+            playerListFrame:Destroy()
         end
-    end)
+    end
+end
+
+-- Fonction pour basculer la liste des boss
+local function toggleBossList()
+    bossListVisible = not bossListVisible
+
+    -- Si la liste est visible, afficher les boss
+    if bossListVisible then
+        local bossListFrame = Instance.new("Frame", frame)
+        bossListFrame.Size = UDim2.new(0, 350, 0, 200)
+        bossListFrame.Position = UDim2.new(0, 25, 0, 120)
+        bossListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        bossListFrame.BorderSizePixel = 0
+        bossListFrame.Name = "BossListFrame"
+
+        -- Ajouter les boss à la liste
+        local bosses = {"Boss1", "Boss2", "Boss3"}  -- Remplace par tes noms de boss réels
+
+        for _, boss in pairs(bosses) do
+            local bossButton = Instance.new("TextButton", bossListFrame)
+            bossButton.Size = UDim2.new(0, 350, 0, 30)
+            bossButton.Position = UDim2.new(0, 0, 0, (_ - 1) * 30)
+            bossButton.Text = boss
+            bossButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            bossButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+            bossButton.MouseButton1Click:Connect(function()
+                -- TP vers le boss sélectionné (ici, utiliser une logique de téléportation de boss)
+                local bossPos = game.Workspace:FindFirstChild(boss).Position
+                game:GetService("Workspace").CurrentCamera.CFrame = CFrame.new(bossPos)
+                bossListFrame:Destroy()  -- Cache la liste après la sélection
+            end)
+        end
+    else
+        -- Si la liste n'est pas visible, cache la liste
+        local bossListFrame = frame:FindFirstChild("BossListFrame")
+        if bossListFrame then
+            bossListFrame:Destroy()
+        end
+    end
+end
+
+-- Événement pour détecter l'appui sur la touche "F"
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.F then
+        toggleGUI()
+    end
 end)
+
+-- Événement pour détecter le clic sur le bouton "TP Joueur"
+tpButton.MouseButton1Click:Connect(togglePlayerList)
+
+-- Événement pour détecter le clic sur le bouton "TP Boss"
+tpBossButton.MouseButton1Click:Connect(toggleBossList)
+
+-- Événement pour détecter le clic sur le bouton pour basculer la GUI
+toggleButton.MouseButton1Click:Connect(toggleGUI)
