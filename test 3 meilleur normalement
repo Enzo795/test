@@ -2,6 +2,82 @@
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- Création de la GUI principale
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "PercyLeMeilleur_Hub"
+gui.IgnoreGuiInset = true
+gui.Enabled = true
+
+-- Création du cadre principal
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 400, 0, 300)
+frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+-- Création du bouton pour basculer la visibilité de la GUI
+local toggleButton = Instance.new("TextButton", frame)
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0.5, -50, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+toggleButton.Text = "Masquer"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 20
+
+-- Création du bouton "TP Joueur"
+local tpButton = Instance.new("TextButton", frame)
+tpButton.Size = UDim2.new(0, 100, 0, 50)
+tpButton.Position = UDim2.new(0.5, -50, 0, 70)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+tpButton.Text = "TP Joueur"
+tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpButton.TextSize = 20
+
+-- Variable pour suivre l'état de la GUI
+local guiVisible = true
+local playerListVisible = false
+
+-- Fonction pour basculer la visibilité de la GUI
+local function toggleGUI()
+    guiVisible = not guiVisible
+    gui.Enabled = guiVisible
+    toggleButton.Text = guiVisible and "Masquer" or "Afficher"
+end
+
+-- Fonction pour basculer la liste des joueurs
+local function togglePlayerList()
+    playerListVisible = not playerListVisible
+
+    -- Si la liste est visible, afficher les joueurs
+    if playerListVisible then
+        local playerListFrame = Instance.new("Frame", frame)
+        playerListFrame.Size = UDim2.new(0, 350, 0, 200)
+        playerListFrame.Position = UDim2.new(0, 25, 0, 120)
+        playerListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        playerListFrame.BorderSizePixel = 0
+        playerListFrame.Name = "PlayerListFrame"
+
+        -- Ajouter les joueurs à la liste
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                local playerButton = Instance.new("TextButton", playerListFrame)
+                playerButton.Size = UDim2.new(0, 350, 0, 30)
+                playerButton.Position = UDim2.new(0,
+
+D'accord, je vais ajouter la fonctionnalité pour les boss, où tu peux choisir un boss à téléporter, et lorsque tu rappuies sur le bouton, la liste des boss disparaît.
+
+### Script complet avec gestion de la liste des joueurs et des boss :
+
+```lua
+-- Services nécessaires
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
