@@ -1,0 +1,198 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PercyLeMeilleur_Dashboard"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = CoreGui
+
+local dashboard = Instance.new("Frame")
+dashboard.Size = UDim2.new(0, 300, 0, 360)
+dashboard.Position = UDim2.new(0.02, 0, 0.5, -180)
+dashboard.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+dashboard.BorderSizePixel = 0
+dashboard.Parent = screenGui
+Instance.new("UICorner", dashboard).CornerRadius = UDim.new(0, 10)
+
+local listLayout = Instance.new("UIListLayout", dashboard)
+listLayout.Padding = UDim.new(0, 5)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function createButton(name, iconId, callback)
+	local btn = Instance.new("Frame")
+	btn.Size = UDim2.new(1, -10, 0, 40)
+	btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	btn.BorderSizePixel = 0
+	btn.Parent = dashboard
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+	local icon = Instance.new("ImageLabel", btn)
+	icon.Size = UDim2.new(0, 40, 1, 0)
+	icon.Position = UDim2.new(0, 5, 0, 0)
+	icon.BackgroundTransparency = 1
+	icon.Image = "rbxassetid://" .. iconId
+
+	local lbl = Instance.new("TextLabel", btn)
+	lbl.Size = UDim2.new(1, -50, 1, 0)
+	lbl.Position = UDim2.new(0, 50, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = name
+	lbl.Font = Enum.Font.GothamBold
+	lbl.TextScaled = true
+	lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+	btn.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			TweenService:Create(btn, TweenInfo.new(0.2), {
+				BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			}):Play()
+		elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+			pcall(callback)
+		end
+	end)
+
+	btn.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			TweenService:Create(btn, TweenInfo.new(0.2), {
+				BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+			}):Play()
+		end
+	end)
+end
+
+-- Fonctionnalités toggle
+local autoFarmEnabled = false
+local autoCoinsEnabled = false
+local yieldEnabled = false
+
+-- Kill Aura (Tue tout le monde)
+local function killAuraEveryone()
+    print("Kill Aura (Tous les joueurs)")
+    while true do
+        for _, target in pairs(game.Players:GetPlayers()) do
+            if target ~= player then
+                -- Attaque le joueur (par exemple en touchant son Humanoid)
+                local character = target.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    humanoid.Health = 0 -- Tue le joueur
+                end
+            end
+        end
+        wait(0.1) -- Répéter toutes les 0.1 secondes
+    end
+end
+
+-- Kill Aura (Tout le monde sauf les amis)
+local function killAuraFriends()
+    print("Kill Aura (Sauf amis)")
+    while true do
+        for _, target in pairs(game.Players:GetPlayers()) do
+            if target ~= player then
+                -- Vérifie si le joueur est un ami
+                if not player:IsFriendsWith(target.UserId) then
+                    -- Attaque le joueur si ce n'est pas un ami
+                    local character = target.Character
+                    if character and character:FindFirstChild("Humanoid") then
+                        local humanoid = character:FindFirstChild("Humanoid")
+                        humanoid.Health = 0 -- Tue le joueur
+                    end
+                end
+            end
+        end
+        wait(0.1) -- Répéter toutes les 0.1 secondes
+    end
+end
+
+-- Création du bouton "Kill Aura (Tout le monde)"
+createButton("Kill Aura (Tous)", "1234567897", function()
+    print("Kill Aura activé (Tous les joueurs)")
+    task.spawn(killAuraEveryone)  -- Lance la fonction qui tue tout le monde
+end)
+
+-- Création du bouton "Kill Aura (Sauf amis)"
+createButton("Kill Aura (Sauf amis)", "1234567898", function()
+    print("Kill Aura activé (Sauf amis)")
+    task.spawn(killAuraFriends)  -- Lance la fonction qui tue sauf les amis
+end)
+
+-- Auto Farm (toggle)
+createButton("Auto Farm", "1234567890", function()
+	autoFarmEnabled = not autoFarmEnabled
+	print("Auto Farm: " .. tostring(autoFarmEnabled))
+	task.spawn(function()
+		while autoFarmEnabled do
+			-- Remplace ici par ta fonction de farm
+			print("Farming...")
+			task.wait(1)
+		end
+	end)
+end)
+
+-- Auto Kill
+createButton("Auto Kill", "1234567891", function()
+	print("Auto Kill")
+	-- Remplace ici par ta fonction réelle
+end)
+
+-- Teleport
+createButton("Teleport", "1234567892", function()
+	print("Open TP Menu")
+	-- Remplace ici
+end)
+
+-- ESP
+createButton("ESP Players", "1234567893", function()
+	print("ESP toggled")
+	-- Remplace ici
+end)
+
+-- Anti AFK
+createButton("Anti AFK", "1234567894", function()
+	print("Anti AFK enabled")
+	local vu = game:service'VirtualUser'
+	player.Idled:Connect(function()
+		vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+		task.wait(1)
+		vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	end)
+end)
+
+-- Yield Console (toggle)
+createButton("Yield Console", "1234567895", function()
+	yieldEnabled = not yieldEnabled
+	if yieldEnabled then
+		print("Yield ON")
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+	else
+		print("Yield OFF")
+		local iy = CoreGui:FindFirstChild("IY_FE") or CoreGui:FindFirstChild("InfiniteYield")
+		if iy then iy:Destroy() end
+	end
+end)
+
+-- Auto Coins (avec TP Boss toggle)
+createButton("Auto Coins", "1234567896", function()
+	autoCoinsEnabled = not autoCoinsEnabled
+	print("Auto Coins: " .. tostring(autoCoinsEnabled))
+
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	task.spawn(function()
+		while autoCoinsEnabled do
+			local boss = workspace:FindFirstChild("Boss") or workspace:FindFirstChild("boss")
+			if boss and boss:FindFirstChild("HumanoidRootPart") then
+				local pos = boss.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+				local tween = TweenService:Create(hrp, TweenInfo.new(0.8), {CFrame = CFrame.new(pos)})
+				tween:Play()
+				tween.Completed:Wait()
+			end
+			task.wait(2)
+		end
+	end)
+end)
