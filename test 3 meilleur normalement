@@ -2,82 +2,6 @@
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-
--- Création de la GUI principale
-local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "PercyLeMeilleur_Hub"
-gui.IgnoreGuiInset = true
-gui.Enabled = true
-
--- Création du cadre principal
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 400, 0, 300)
-frame.Position = UDim2.new(0.5, -200, 0.5, -150)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-
--- Création du bouton pour basculer la visibilité de la GUI
-local toggleButton = Instance.new("TextButton", frame)
-toggleButton.Size = UDim2.new(0, 100, 0, 50)
-toggleButton.Position = UDim2.new(0.5, -50, 0, 10)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-toggleButton.Text = "Masquer"
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.TextSize = 20
-
--- Création du bouton "TP Joueur"
-local tpButton = Instance.new("TextButton", frame)
-tpButton.Size = UDim2.new(0, 100, 0, 50)
-tpButton.Position = UDim2.new(0.5, -50, 0, 70)
-tpButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-tpButton.Text = "TP Joueur"
-tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpButton.TextSize = 20
-
--- Variable pour suivre l'état de la GUI
-local guiVisible = true
-local playerListVisible = false
-
--- Fonction pour basculer la visibilité de la GUI
-local function toggleGUI()
-    guiVisible = not guiVisible
-    gui.Enabled = guiVisible
-    toggleButton.Text = guiVisible and "Masquer" or "Afficher"
-end
-
--- Fonction pour basculer la liste des joueurs
-local function togglePlayerList()
-    playerListVisible = not playerListVisible
-
-    -- Si la liste est visible, afficher les joueurs
-    if playerListVisible then
-        local playerListFrame = Instance.new("Frame", frame)
-        playerListFrame.Size = UDim2.new(0, 350, 0, 200)
-        playerListFrame.Position = UDim2.new(0, 25, 0, 120)
-        playerListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        playerListFrame.BorderSizePixel = 0
-        playerListFrame.Name = "PlayerListFrame"
-
-        -- Ajouter les joueurs à la liste
-        for _, otherPlayer in pairs(Players:GetPlayers()) do
-            if otherPlayer ~= player then
-                local playerButton = Instance.new("TextButton", playerListFrame)
-                playerButton.Size = UDim2.new(0, 350, 0, 30)
-                playerButton.Position = UDim2.new(0,
-
-D'accord, je vais ajouter la fonctionnalité pour les boss, où tu peux choisir un boss à téléporter, et lorsque tu rappuies sur le bouton, la liste des boss disparaît.
-
-### Script complet avec gestion de la liste des joueurs et des boss :
-
-```lua
--- Services nécessaires
-local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -91,12 +15,49 @@ gui.Enabled = true
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 400, 0, 300)
 frame.Position = UDim2.new(0.5, -200, 0.5, -150)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
--- Création du bouton pour basculer la visibilité de la GUI
+-- Ajout de l'ImageLabel (fond d'écran)
+local background = Instance.new("ImageLabel", frame)
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundTransparency = 1
+background.Image = "https://i.imgur.com/NXgZQ9B.jpg"
+background.ScaleType = Enum.ScaleType.Crop
+
+-- Création de la barre de titre
+local titleBar = Instance.new("Frame", frame)
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+titleBar.BorderSizePixel = 0
+
+-- Titre de la fenêtre
+local titleLabel = Instance.new("TextLabel", titleBar)
+titleLabel.Size = UDim2.new(1, 0, 1, 0)
+titleLabel.Text = "Percy Le Meilleur Hub"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.BackgroundTransparency = 1
+titleLabel.TextSize = 20
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Bouton de fermeture
+local closeButton = Instance.new("TextButton", titleBar)
+closeButton.Size = UDim2.new(0, 30, 1, 0)
+closeButton.Position = UDim2.new(1, -30, 0, 0)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 18
+
+-- Fonction pour fermer la GUI
+closeButton.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- Toggle Button Visibilité
 local toggleButton = Instance.new("TextButton", frame)
 toggleButton.Size = UDim2.new(0, 100, 0, 50)
 toggleButton.Position = UDim2.new(0.5, -50, 0, 10)
@@ -105,7 +66,14 @@ toggleButton.Text = "Masquer"
 toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleButton.TextSize = 20
 
--- Création du bouton "TP Joueur"
+local guiVisible = true
+toggleButton.MouseButton1Click:Connect(function()
+    guiVisible = not guiVisible
+    gui.Enabled = guiVisible
+    toggleButton.Text = guiVisible and "Masquer" or "Afficher"
+end)
+
+-- TP Joueur
 local tpButton = Instance.new("TextButton", frame)
 tpButton.Size = UDim2.new(0, 100, 0, 50)
 tpButton.Position = UDim2.new(0.5, -50, 0, 70)
@@ -114,7 +82,7 @@ tpButton.Text = "TP Joueur"
 tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpButton.TextSize = 20
 
--- Création du bouton "TP Boss"
+-- TP Boss
 local tpBossButton = Instance.new("TextButton", frame)
 tpBossButton.Size = UDim2.new(0, 100, 0, 50)
 tpBossButton.Position = UDim2.new(0.5, -50, 0, 130)
@@ -123,109 +91,83 @@ tpBossButton.Text = "TP Boss"
 tpBossButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpBossButton.TextSize = 20
 
--- Variable pour suivre l'état de la GUI
-local guiVisible = true
-local playerListVisible = false
-local bossListVisible = false
+-- Auto Coins
+local autoCoins = false
+local autoCoinButton = Instance.new("TextButton", frame)
+autoCoinButton.Size = UDim2.new(0, 120, 0, 50)
+autoCoinButton.Position = UDim2.new(0.5, -60, 0, 190)
+autoCoinButton.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+autoCoinButton.Text = "Auto Coins: OFF"
+autoCoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoCoinButton.TextSize = 18
 
--- Fonction pour basculer la visibilité de la GUI
-local function toggleGUI()
-    guiVisible = not guiVisible
-    gui.Enabled = guiVisible
-    toggleButton.Text = guiVisible and "Masquer" or "Afficher"
-end
+autoCoinButton.MouseButton1Click:Connect(function()
+    autoCoins = not autoCoins
+    autoCoinButton.Text = autoCoins and "Auto Coins: ON" or "Auto Coins: OFF"
+    autoCoinButton.BackgroundColor3 = autoCoins and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 170, 0)
+end)
 
--- Fonction pour basculer la liste des joueurs
-local function togglePlayerList()
-    playerListVisible = not playerListVisible
-
-    -- Si la liste est visible, afficher les joueurs
-    if playerListVisible then
-        local playerListFrame = Instance.new("Frame", frame)
-        playerListFrame.Size = UDim2.new(0, 350, 0, 200)
-        playerListFrame.Position = UDim2.new(0, 25, 0, 120)
-        playerListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        playerListFrame.BorderSizePixel = 0
-        playerListFrame.Name = "PlayerListFrame"
-
-        -- Ajouter les joueurs à la liste
-        for _, otherPlayer in pairs(Players:GetPlayers()) do
-            if otherPlayer ~= player then
-                local playerButton = Instance.new("TextButton", playerListFrame)
-                playerButton.Size = UDim2.new(0, 350, 0, 30)
-                playerButton.Position = UDim2.new(0, 0, 0, (otherPlayer.UserId % 10) * 30)
-                playerButton.Text = otherPlayer.Name
-                playerButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-                playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-                playerButton.MouseButton1Click:Connect(function()
-                    -- TP vers le joueur sélectionné
-                    game:GetService("Workspace").CurrentCamera.CFrame = otherPlayer.Character.HumanoidRootPart.CFrame
-                    playerListFrame:Destroy()  -- Cache la liste après la sélection
-                end)
-            end
-        end
-    else
-        -- Si la liste n'est pas visible, cache la liste
-        local playerListFrame = frame:FindFirstChild("PlayerListFrame")
-        if playerListFrame then
-            playerListFrame:Destroy()
-        end
-    end
-end
-
--- Fonction pour basculer la liste des boss
-local function toggleBossList()
-    bossListVisible = not bossListVisible
-
-    -- Si la liste est visible, afficher les boss
-    if bossListVisible then
-        local bossListFrame = Instance.new("Frame", frame)
-        bossListFrame.Size = UDim2.new(0, 350, 0, 200)
-        bossListFrame.Position = UDim2.new(0, 25, 0, 120)
-        bossListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        bossListFrame.BorderSizePixel = 0
-        bossListFrame.Name = "BossListFrame"
-
-        -- Ajouter les boss à la liste
-        local bosses = {"Boss1", "Boss2", "Boss3"}  -- Remplace par tes noms de boss réels
-
-        for _, boss in pairs(bosses) do
-            local bossButton = Instance.new("TextButton", bossListFrame)
-            bossButton.Size = UDim2.new(0, 350, 0, 30)
-            bossButton.Position = UDim2.new(0, 0, 0, (_ - 1) * 30)
-            bossButton.Text = boss
-            bossButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            bossButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-            bossButton.MouseButton1Click:Connect(function()
-                -- TP vers le boss sélectionné (ici, utiliser une logique de téléportation de boss)
-                local bossPos = game.Workspace:FindFirstChild(boss).Position
-                game:GetService("Workspace").CurrentCamera.CFrame = CFrame.new(bossPos)
-                bossListFrame:Destroy()  -- Cache la liste après la sélection
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if autoCoins then
+            pcall(function()
+                ReplicatedStorage:WaitForChild("Events"):WaitForChild("CoinEvent"):FireServer()
             end)
         end
-    else
-        -- Si la liste n'est pas visible, cache la liste
-        local bossListFrame = frame:FindFirstChild("BossListFrame")
-        if bossListFrame then
-            bossListFrame:Destroy()
-        end
-    end
-end
-
--- Événement pour détecter l'appui sur la touche "F"
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.F then
-        toggleGUI()
     end
 end)
 
--- Événement pour détecter le clic sur le bouton "TP Joueur"
-tpButton.MouseButton1Click:Connect(togglePlayerList)
+-- Auto Farm avec TP
+local autoFarm = false
+local autoFarmButton = Instance.new("TextButton", frame)
+autoFarmButton.Size = UDim2.new(0, 120, 0, 50)
+autoFarmButton.Position = UDim2.new(0.5, -60, 0, 250)
+autoFarmButton.BackgroundColor3 = Color3.fromRGB(170, 85, 255)
+autoFarmButton.Text = "Auto Farm: OFF"
+autoFarmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoFarmButton.TextSize = 18
 
--- Événement pour détecter le clic sur le bouton "TP Boss"
-tpBossButton.MouseButton1Click:Connect(toggleBossList)
+autoFarmButton.MouseButton1Click:Connect(function()
+    autoFarm = not autoFarm
+    autoFarmButton.Text = autoFarm and "Auto Farm: ON" or "Auto Farm: OFF"
+    autoFarmButton.BackgroundColor3 = autoFarm and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(170, 85, 255)
+end)
 
--- Événement pour détecter le clic sur le bouton pour basculer la GUI
-toggleButton.MouseButton1Click:Connect(toggleGUI)
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if autoFarm and Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = Players.LocalPlayer.Character.HumanoidRootPart
+            hrp.CFrame = CFrame.new(
+                Vector3.new(-81.7181931, 594.046448, 814.437866),
+                Vector3.new(-81.7181931, 594.046448, 814.437866) + Vector3.new(0.707134247, 0, 0.707079291)
+            )
+        end
+    end
+end)
+
+-- Minimisation intelligente par clic sur la barre
+local isMinimized = false
+local function setGUIVisibility(minimized)
+    isMinimized = minimized
+    if minimized then
+        for _, child in pairs(frame:GetChildren()) do
+            if child ~= titleBar then
+                child.Visible = false
+            end
+        end
+        frame.Size = UDim2.new(0, 400, 0, 30)
+    else
+        for _, child in pairs(frame:GetChildren()) do
+            child.Visible = true
+        end
+        frame.Size = UDim2.new(0, 400, 0, 300)
+    end
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        setGUIVisibility(not isMinimized)
+    end
+end)
